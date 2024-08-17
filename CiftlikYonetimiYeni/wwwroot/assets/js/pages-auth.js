@@ -14,67 +14,67 @@ document.addEventListener('DOMContentLoaded', function (e) {
           username: {
             validators: {
               notEmpty: {
-                message: 'Lütfen Kullanıcı Adını Giriniz'
+                message: 'LÃ¼tfen KullanÄ±cÄ± AdÄ±nÄ± Giriniz'
               },
               stringLength: {
-                min: 6,
-                message: 'Kullanıcı Adı 6 Karakterden fazla olmalıdır'
+                min: 5,
+                message: 'KullanÄ±cÄ± AdÄ± en az 5 Karakter olmalÄ±dÄ±r.'
               }
             }
           },
           email: {
             validators: {
               notEmpty: {
-                message: 'Lütfen E-mail Adresininizi Giriniz'
+                message: 'LÃ¼tfen E-mail Adresininizi Giriniz'
               },
               emailAddress: {
-                message: 'Lütfen Geçerli bir mail adresi girin'
+                message: 'LÃ¼tfen GeÃ§erli bir mail adresi girin'
               }
             }
           },
           'email-username': {
             validators: {
               notEmpty: {
-                message: 'Lütfen Email ya da Kullanıcı Adı Giriniz'
+                message: 'LÃ¼tfen Email ya da KullanÄ±cÄ±cÄ± AdÄ± Giriniz'
               },
               stringLength: {
-                min: 6,
-                message: 'Kullanıcı Adı 6 Karakterden Fazla Olmalıdır'
+                min: 5,
+                message: 'KullanÄ±cÄ± AdÄ± 5 Karakterden Fazla OlmalÄ±dÄ±r'
               }
             }
           },
           password: {
             validators: {
               notEmpty: {
-                message: 'Lütfen Parolanızı Giriniz'
+                message: 'LÃ¼tfen ParolanÄ±zÄ± Giriniz'
               },
               stringLength: {
-                min: 6,
-                message: 'Parolanız En Az 6 Karakter Olmalıdır.'
+                min: 5,
+                message: 'ParolanÄ±z En Az 5 Karakter OlmalÄ±dÄ±r.'
               }
             }
           },
           'confirm-password': {
             validators: {
               notEmpty: {
-                message: 'Lütfen Parolanızı Onaylayın'
+                message: 'LÃ¼tfen ParolanÄ±zÄ± OnaylayÄ±n'
               },
               identical: {
                 compare: function () {
                   return formAuthentication.querySelector('[name="password"]').value;
                 },
-                message: 'The password and its confirm are not the same'
+                message: 'Parolalar UyuÅŸmuyor'
               },
               stringLength: {
-                min: 6,
-                message: 'Password must be more than 6 characters'
+                min: 5,
+                message: 'ParolanÄ±z en az 5 karakter olmalÄ±dÄ±r'
               }
             }
           },
           terms: {
             validators: {
               notEmpty: {
-                message: 'Please agree terms & conditions'
+                message: 'LÃ¼tfen KullanÄ±cÄ± SÃ¶zleÅŸmesini onaylayÄ±n'
               }
             }
           }
