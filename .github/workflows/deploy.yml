@@ -3,7 +3,7 @@ name: Deploy to Ubuntu Server
 on:
   push:
     branches:
-      - main  # Hangi branch'e push yapıldığında bu workflow'un çalışacağını belirtiyor.
+      - master  # Hangi branch'e push yapıldığında bu workflow'un çalışacağını belirtiyor.
 
 jobs:
   deploy:
@@ -21,4 +21,4 @@ jobs:
 
     - name: Deploy to server
       run: |
-        ssh -o StrictHostKeyChecking=no root@http://134.122.126.36/ 'cd /var/www/CiftlikYonetimSistemiX && git pull origin main && dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX && sudo systemctl restart CiftlikYonetimSistemi.service'
+        ssh -o StrictHostKeyChecking=no root@134.122.126.36 'cd /var/www/CiftlikYonetimSistemiX && git pull origin main && dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX && sudo systemctl restart CiftlikYonetimSistemi.service'
