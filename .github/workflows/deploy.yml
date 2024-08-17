@@ -20,4 +20,8 @@ jobs:
 
     - name: Deploy to server
       run: |
-        ssh -v -o StrictHostKeyChecking=no root@134.122.126.36 'cd /var/www/CiftlikYonetimSistemiX && git pull origin main && dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX && sudo systemctl restart CiftlikYonetimSistemi.service'
+ssh -v -o StrictHostKeyChecking=no root@134.122.126.36 '
+cd /home/CiftlikYonetimiYeniX && git pull origin master &&
+cd /home/CiftlikYonetimiYeniX/CiftlikYonetimiYeni &&
+dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX &&
+sudo systemctl restart CiftlikYonetimSistemi.service'
