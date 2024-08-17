@@ -11,14 +11,13 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # GitHub repo'sundan kodu çekme
+      uses: actions/checkout@v3  # Node.js 16 veya 20 ile uyumlu sürüm
 
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3  # SSH anahtarını ayarlama
       with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy to server
       run: |
-        ssh -o StrictHostKeyChecking=no root@134.122.126.36 'cd /var/www/CiftlikYonetimSistemiX && git pull origin main && dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX && sudo systemctl restart CiftlikYonetimSistemi.service'
+        ssh -v -o StrictHostKeyChecking=no root@134.122.126.36 'cd /var/www/CiftlikYonetimSistemiX && git pull origin main && dotnet publish --configuration Release --output /var/www/CiftlikYonetimSistemiX && sudo systemctl restart CiftlikYonetimSistemi.service'
