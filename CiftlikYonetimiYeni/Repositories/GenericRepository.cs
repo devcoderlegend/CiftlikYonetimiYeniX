@@ -10,12 +10,14 @@ public interface IGenericRepository<T> where T : class
 {
     Task<T> GetByIdAsync(int id);
     Task<IEnumerable<T>> GetAllAsync();
+    IQueryable<T> GetAll();  // IQueryable döndürüyoruz
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
     Task AddAsync(T entity);
     void Update(T entity);
     Task SoftDeleteAsync(int id);
     Task<int> SaveChangesAsync();
 }
+
 
 public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
@@ -33,9 +35,14 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _dbSet.FindAsync(id);
     }
 
+    public IQueryable<T> GetAll()
+    {
+        return _dbSet.AsQueryable();  // IQueryable döndürür
+    }
+
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();  // Asenkron tüm verileri getirir
     }
 
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
