@@ -14,50 +14,50 @@ document.addEventListener('DOMContentLoaded', function (e) {
           username: {
             validators: {
               notEmpty: {
-                message: 'Please enter username'
+                message: 'Lütfen Kullanýcý Adýný Giriniz'
               },
               stringLength: {
                 min: 6,
-                message: 'Username must be more than 6 characters'
+                message: 'Kullanýcý Adý 6 Karakterden fazla olmalýdýr'
               }
             }
           },
           email: {
             validators: {
               notEmpty: {
-                message: 'Please enter your email'
+                message: 'Lütfen E-mail Adresininizi Giriniz'
               },
               emailAddress: {
-                message: 'Please enter valid email address'
+                message: 'Lütfen Geçerli bir mail adresi girin'
               }
             }
           },
           'email-username': {
             validators: {
               notEmpty: {
-                message: 'Please enter email / username'
+                message: 'Lütfen Email ya da Kullanýcý Adý Giriniz'
               },
               stringLength: {
                 min: 6,
-                message: 'Username must be more than 6 characters'
+                message: 'Kullanýcý Adý 6 Karakterden Fazla Olmalýdýr'
               }
             }
           },
           password: {
             validators: {
               notEmpty: {
-                message: 'Please enter your password'
+                message: 'Lütfen Parolanýzý Giriniz'
               },
               stringLength: {
                 min: 6,
-                message: 'Password must be more than 6 characters'
+                message: 'Parolanýz En Az 6 Karakter Olmalýdýr.'
               }
             }
           },
           'confirm-password': {
             validators: {
               notEmpty: {
-                message: 'Please confirm password'
+                message: 'Lütfen Parolanýzý Onaylayýn'
               },
               identical: {
                 compare: function () {
