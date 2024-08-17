@@ -8,9 +8,11 @@ namespace CiftlikYonetimiYeni.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly EmailService _emailService;
+
+        public HomeController(EmailService emailService)
         {
-            _logger = logger;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -27,6 +29,12 @@ namespace CiftlikYonetimiYeni.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public async Task<IActionResult> SendEmail()
+        {
+            await _emailService.SendEmailAsync("algoritmauzmani@gmail.com", "Test Subject", "Test Body");
+            return View();
         }
     }
 }

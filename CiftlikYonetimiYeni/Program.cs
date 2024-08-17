@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using CiftlikYonetimiYeni.Helper;
 using System.Text;
-using Helper; // Helper klasöründeki JwtSettings sýnýfýný kullanmak için ekleyin
+using Helper;
+using CiftlikYonetimiYeni.Models.ExternalModels; // Helper klasöründeki JwtSettings sýnýfýný kullanmak için ekleyin
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -47,7 +48,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserDeviceTypeService, UserDeviceTypeService>();
 builder.Services.AddScoped<IUserDeviceService, UserDeviceService>();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
-
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddTransient<EmailService, EmailService>();
 // AutoMapper configuration
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
