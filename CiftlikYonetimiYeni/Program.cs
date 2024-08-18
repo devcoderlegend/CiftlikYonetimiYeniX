@@ -52,6 +52,7 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpS
 builder.Services.AddTransient<EmailService, EmailService>();
 // AutoMapper configuration
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // MediatR configuration (if you're using it)
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));

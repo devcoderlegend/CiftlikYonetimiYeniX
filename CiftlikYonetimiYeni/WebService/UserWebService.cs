@@ -20,20 +20,17 @@ namespace CiftlikYonetimiYeni.WebService
     public class UserWebService : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IUserDeviceService _userDeviceService;
         private readonly IUserSessionService _userSessionService;
         private readonly JwtSettings _jwtSettings;
         private readonly IRefreshTokenService _refreshTokenService;
 
         public UserWebService(
             IUserService userService,
-            IUserDeviceService userDeviceService,
             IUserSessionService userSessionService,
             IOptions<JwtSettings> jwtSettings,
             IRefreshTokenService refreshTokenService)
         {
             _userService = userService;
-            _userDeviceService = userDeviceService;
             _userSessionService = userSessionService;
             _jwtSettings = jwtSettings.Value;
             _refreshTokenService = refreshTokenService;
@@ -48,26 +45,36 @@ namespace CiftlikYonetimiYeni.WebService
                 return Unauthorized("Invalid email or password.");
             }
 
-            // JWT Token oluşturma
-            var tokenString = GenerateJwtToken(user);
-
-            // Refresh token oluşturma
-            var refreshToken = new RefreshToken
+            // Kullanıcı cihazı Web ise (DeviceId -1 olarak gönderildiğinde)
+            if (model.DeviceId == "-1")
             {
-                Token = GenerateRefreshToken(),
-                Expires = DateTime.UtcNow.AddDays(7), // Refresh token geçerlilik süresi
-                Created = DateTime.UtcNow,
-                UserId = user.Id
-            };
+                // UserDevice kaydı yapılmaz
+                var tokenString = GenerateJwtToken(user);
 
-            // Refresh token'ı veritabanına kaydet
-            await _refreshTokenService.CreateAsync(refreshToken);
+                // Refresh token oluşturma
+                var refreshToken = new RefreshToken
+                {
+                    Token = GenerateRefreshToken(),
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    Created = DateTime.UtcNow,
+                    UserId = user.Id
+                };
 
-            return Ok(new
-            {
-                Token = tokenString,
-                RefreshToken = refreshToken.Token
-            });
+                // Refresh token'ı veritabanına kaydet
+                await _refreshTokenService.CreateAsync(refreshToken);
+
+                return Ok(new
+                {
+                    Token = tokenString,
+                    RefreshToken = refreshToken.Token
+                });
+            }
+
+            // Diğer cihazlar için işlemler (DeviceId -1 değilse)
+            // Burada isteğe bağlı olarak cihaz ile ilgili işlemler yapılabilir
+            // Eğer ek bir işlem yapılması gerekiyorsa buraya ekleyebilirsiniz
+
+            return Ok(new { Message = "Login successful but no device action was taken" });
         }
 
         [HttpPost("refresh-token")]
@@ -209,11 +216,6 @@ namespace CiftlikYonetimiYeni.WebService
                 rng.GetBytes(randomBytes);
                 return Convert.ToBase64String(randomBytes);
             }
-        }
-
-        private bool IsMobileDevice(string userAgent)
-        {
-            return userAgent.ToLower().Contains("android") || userAgent.ToLower().Contains("iphone");
         }
     }
 
