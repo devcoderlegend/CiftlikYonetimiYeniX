@@ -1,9 +1,10 @@
 ﻿using CiftlikYonetimiYeni.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CiftlikYonetimiYeni.Services
 {
-
-
     public interface IUserDeviceService
     {
         Task<UserDevice> GetByIdAsync(int id);
@@ -11,7 +12,7 @@ namespace CiftlikYonetimiYeni.Services
         Task<UserDevice> CreateAsync(UserDevice userDevice);
         Task UpdateAsync(UserDevice userDevice);
         Task DeleteAsync(int id);
-        Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int userDeviceTypeId, string userAgent);
+        Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int? userDeviceTypeId, string userAgent);
     }
 
     public class UserDeviceService : IUserDeviceService
@@ -35,6 +36,9 @@ namespace CiftlikYonetimiYeni.Services
 
         public async Task<UserDevice> CreateAsync(UserDevice userDevice)
         {
+            // Benzersiz GUID oluştur ve GeneratedKey kolonuna ata
+            userDevice.GeneratedKey = Guid.NewGuid().ToString();
+
             await _repository.AddAsync(userDevice);
             await _repository.SaveChangesAsync();
             return userDevice;
@@ -52,7 +56,7 @@ namespace CiftlikYonetimiYeni.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int userDeviceTypeId, string userAgent)
+        public async Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int? userDeviceTypeId, string userAgent)
         {
             var device = (await _repository.FindAsync(d => d.DeviceId == deviceId)).FirstOrDefault();
 
@@ -68,7 +72,8 @@ namespace CiftlikYonetimiYeni.Services
                     Authorized = 0,
                     IsMobile = userDeviceTypeId == 2 ? 1 : 0,
                     RegistrationDate = DateTime.UtcNow,
-                    Active = 1
+                    Active = 1,
+                    GeneratedKey = Guid.NewGuid().ToString() // GUID oluştur ve GeneratedKey kolonuna ata
                 };
                 await CreateAsync(device);
             }

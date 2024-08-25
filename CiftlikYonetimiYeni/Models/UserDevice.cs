@@ -27,6 +27,8 @@ public partial class UserDevice
 
     public int? UserDeviceTypeId { get; set; }
 
+    public string? GeneratedKey { get; set; }
+
     public virtual UserDeviceType? UserDeviceType { get; set; }
 
     public virtual ICollection<UserSession> UserSessions { get; set; } = new List<UserSession>();

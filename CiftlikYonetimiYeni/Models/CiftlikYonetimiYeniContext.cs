@@ -5,13 +5,13 @@ using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
 namespace CiftlikYonetimiYeni.Models;
 
-public partial class CiftlikYonetimiDbContext : DbContext
+public partial class CiftlikYonetimiYeniContext : DbContext
 {
-    public CiftlikYonetimiDbContext()
+    public CiftlikYonetimiYeniContext()
     {
     }
 
-    public CiftlikYonetimiDbContext(DbContextOptions<CiftlikYonetimiDbContext> options)
+    public CiftlikYonetimiYeniContext(DbContextOptions<CiftlikYonetimiYeniContext> options)
         : base(options)
     {
     }
@@ -354,6 +354,7 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
             entity.Property(e => e.BrandName).HasMaxLength(1000);
             entity.Property(e => e.DeviceId).HasMaxLength(1000);
+            entity.Property(e => e.GeneratedKey).HasMaxLength(255);
             entity.Property(e => e.Model).HasMaxLength(1000);
             entity.Property(e => e.RegistrationDate).HasColumnType("datetime");
             entity.Property(e => e.UpdateTime).HasColumnType("datetime");

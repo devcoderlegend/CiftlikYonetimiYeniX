@@ -1,4 +1,3 @@
-using CiftlikYonetimiYeni.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using MediatR;
@@ -10,9 +9,14 @@ using CiftlikYonetimiYeni.Helper;
 using System.Text;
 using Helper;
 using CiftlikYonetimiYeni.Models.ExternalModels; // Helper klasöründeki JwtSettings sýnýfýný kullanmak için ekleyin
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using CiftlikYonetimiYeni.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+// JWT Settings'i al ve Configure ile DI konteynerine ekle
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 // JWT Authentication servislerini ekliyoruz.
 builder.Services.AddAuthentication(options =>
@@ -22,6 +26,9 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // JWT ayarlarýný DI ile alýyoruz
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -68,11 +75,10 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API Name v1"));
 
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication(); // Authentication middleware ekliyoruz
 app.UseAuthorization();
 
 app.MapControllerRoute(
