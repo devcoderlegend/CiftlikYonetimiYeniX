@@ -6,13 +6,13 @@ using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
 namespace CiftlikYonetimiYeni.Data;
 
-public partial class CiftlikYonetimiDbContext : DbContext
+public partial class CiftlikYonetimiYeniContext : DbContext
 {
-    public CiftlikYonetimiDbContext()
+    public CiftlikYonetimiYeniContext()
     {
     }
 
-    public CiftlikYonetimiDbContext(DbContextOptions<CiftlikYonetimiDbContext> options)
+    public CiftlikYonetimiYeniContext(DbContextOptions<CiftlikYonetimiYeniContext> options)
         : base(options)
     {
     }
@@ -29,15 +29,17 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
     public virtual DbSet<Device> Devices { get; set; }
 
-    public virtual DbSet<DeviceDepartmentMapping> DeviceDepartmentMappings { get; set; }
-
     public virtual DbSet<DeviceProfile> DeviceProfiles { get; set; }
 
     public virtual DbSet<DeviceProfileAttribute> DeviceProfileAttributes { get; set; }
 
+    public virtual DbSet<DeviceUserMapping> DeviceUserMappings { get; set; }
+
     public virtual DbSet<DeviceValueReceive> DeviceValueReceives { get; set; }
 
     public virtual DbSet<Farm> Farms { get; set; }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<Rfid> Rfids { get; set; }
 
@@ -61,7 +63,7 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=185.106.20.137;database=CiftlikYonetimiYeni;user=abulu;password=Merlab.2642", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
+        => optionsBuilder.UseMySql("server=185.106.20.137;database=CiftlikYonetimiYeni;user=abulu;password=Merlab.2642", ServerVersion.Parse("8.0.39-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -151,31 +153,9 @@ public partial class CiftlikYonetimiDbContext : DbContext
             entity.Property(e => e.DeviceName).HasMaxLength(255);
             entity.Property(e => e.Guid).HasMaxLength(255);
             entity.Property(e => e.UniqueId).HasMaxLength(255);
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<DeviceDepartmentMapping>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("DeviceDepartmentMapping");
-
-            entity.HasIndex(e => e.DeviceId, "FK_Department_Mapping");
-
-            entity.HasIndex(e => e.DepartmentId, "FK_Device_Department");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.DeviceDepartmentMappings)
-                .HasForeignKey(d => d.DepartmentId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Device_Department");
-
-            entity.HasOne(d => d.Device).WithMany(p => p.DeviceDepartmentMappings)
-                .HasForeignKey(d => d.DeviceId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Department_Mapping");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasColumnType("datetime");
         });
 
         modelBuilder.Entity<DeviceProfile>(entity =>
@@ -186,13 +166,16 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
             entity.HasIndex(e => e.DeviceId, "FK_Device_DeviceProfile");
 
+            entity.Property(e => e.Active).HasDefaultValueSql("'1'");
             entity.Property(e => e.EndByte)
                 .HasMaxLength(1)
                 .IsFixedLength();
             entity.Property(e => e.StartByte)
                 .HasMaxLength(1)
                 .IsFixedLength();
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.Device).WithMany(p => p.DeviceProfiles)
                 .HasForeignKey(d => d.DeviceId)
@@ -210,7 +193,9 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
             entity.HasIndex(e => e.DeviceProfileId, "FK_DeviceProfile_DeviceProfileAttribute");
 
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.DataType).WithMany(p => p.DeviceProfileAttributes)
                 .HasForeignKey(d => d.DataTypeId)
@@ -223,6 +208,30 @@ public partial class CiftlikYonetimiDbContext : DbContext
                 .HasConstraintName("FK_DeviceProfile_DeviceProfileAttribute");
         });
 
+        modelBuilder.Entity<DeviceUserMapping>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("DeviceUserMapping");
+
+            entity.HasIndex(e => e.DeviceId, "FK_Department_Mapping");
+
+            entity.HasIndex(e => e.UserId, "FK_Device_User");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Device).WithMany(p => p.DeviceUserMappings)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Department_Mapping");
+
+            entity.HasOne(d => d.User).WithMany(p => p.DeviceUserMappings)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Device_User");
+        });
+
         modelBuilder.Entity<DeviceValueReceive>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
@@ -231,9 +240,12 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
             entity.HasIndex(e => e.DeviceDepartmentMappingId, "FK_DeviceMap_Received");
 
+            entity.Property(e => e.Active).HasDefaultValueSql("'1'");
             entity.Property(e => e.InsertTime).HasColumnType("datetime");
             entity.Property(e => e.ReceivedInformation).HasColumnType("tinyblob");
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.DeviceDepartmentMapping).WithMany(p => p.DeviceValueReceives)
                 .HasForeignKey(d => d.DeviceDepartmentMappingId)
@@ -255,6 +267,23 @@ public partial class CiftlikYonetimiDbContext : DbContext
                 .HasForeignKey(d => d.DepartmentId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Department_Farm");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("RefreshToken");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Created).HasColumnType("datetime");
+            entity.Property(e => e.Expires).HasColumnType("datetime");
+            entity.Property(e => e.Revoked).HasColumnType("datetime");
+            entity.Property(e => e.Token).HasMaxLength(255);
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.RefreshToken)
+                .HasForeignKey<RefreshToken>(d => d.Id)
+                .HasConstraintName("FK_RT_User");
         });
 
         modelBuilder.Entity<Rfid>(entity =>
@@ -336,6 +365,7 @@ public partial class CiftlikYonetimiDbContext : DbContext
 
             entity.Property(e => e.BrandName).HasMaxLength(1000);
             entity.Property(e => e.DeviceId).HasMaxLength(1000);
+            entity.Property(e => e.GeneratedKey).HasMaxLength(255);
             entity.Property(e => e.Model).HasMaxLength(1000);
             entity.Property(e => e.RegistrationDate).HasColumnType("datetime");
             entity.Property(e => e.UpdateTime).HasColumnType("datetime");

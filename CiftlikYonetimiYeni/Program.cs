@@ -46,7 +46,7 @@ builder.Services.AddControllersWithViews()
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
 // DbContext configuration
-builder.Services.AddDbContext<CiftlikYonetimiDbContext>(options =>
+builder.Services.AddDbContext<CiftlikYonetimiYeniContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 39))));
 

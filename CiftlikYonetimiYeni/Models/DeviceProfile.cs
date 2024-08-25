@@ -19,6 +19,8 @@ public partial class DeviceProfile
 
     public DateTime? UpdateTime { get; set; }
 
+    public int? Active { get; set; }
+
     public virtual Device? Device { get; set; }
 
     public virtual ICollection<DeviceProfileAttribute> DeviceProfileAttributes { get; set; } = new List<DeviceProfileAttribute>();
