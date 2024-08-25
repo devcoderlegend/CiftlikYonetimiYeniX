@@ -19,7 +19,7 @@ public partial class RefreshToken
 
     public int? IsActive { get; set; }
 
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
 
     public virtual User IdNavigation { get; set; } = null!;
 }

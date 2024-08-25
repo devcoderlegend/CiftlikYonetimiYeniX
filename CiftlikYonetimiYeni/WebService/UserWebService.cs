@@ -47,7 +47,6 @@ namespace CiftlikYonetimiYeni.WebService
             // Handle desktop login (DeviceId = -1)
             if (model.DeviceId == "-1")
             {
-                // Normal login without device information
                 var user = await _userService.AuthenticateUserAsync(model.Email, model.Password);
                 if (user == null)
                 {
@@ -67,12 +66,15 @@ namespace CiftlikYonetimiYeni.WebService
 
                 await _refreshTokenService.CreateAsync(refreshToken);
 
+                var devices = await _userService.GetUserDevicesAsync(user.Id); // Kullanıcının cihaz bilgilerini al
+
                 response.Success = true;
                 response.Message = "Login successful";
                 response.Data = new
                 {
                     Token = tokenString,
-                    RefreshToken = refreshToken.Token
+                    RefreshToken = refreshToken.Token,
+                    Devices = devices  // Cihaz bilgilerini de yanıt olarak dön
                 };
 
                 return Ok(response);
@@ -113,6 +115,8 @@ namespace CiftlikYonetimiYeni.WebService
 
             await _refreshTokenService.CreateAsync(newRefreshToken);
 
+            var devicesForUser = await _userService.GetUserDevicesAsync(userDeviceLogin.Id);  // Kullanıcının cihaz bilgilerini al
+
             response.Success = true;
             response.Message = "Login successful";
             response.Data = new
@@ -120,11 +124,13 @@ namespace CiftlikYonetimiYeni.WebService
                 Token = deviceToken,
                 RefreshToken = newRefreshToken.Token,
                 UserDeviceId = userDevice.Id,
-                GeneratedKey = userDevice.GeneratedKey
+                GeneratedKey = userDevice.GeneratedKey,
+                Devices = devicesForUser  // Cihaz bilgilerini de yanıt olarak dön
             };
 
             return Ok(response);
         }
+
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel model)

@@ -1,92 +1,73 @@
-﻿using CiftlikYonetimiYeni.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CiftlikYonetimiYeni.Models;
 
-namespace CiftlikYonetimiYeni.Services
+public interface IUserDeviceService
 {
-    public interface IUserDeviceService
+    Task<UserDevice> RegisterUserDeviceAsync(UserDevice userDevice);
+    Task<UserDevice> GetUserDeviceByIdAsync(int id);
+    Task<IEnumerable<UserDevice>> GetAllUserDevicesAsync();
+    Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int userDeviceTypeId, string userAgent);
+
+}
+
+public class UserDeviceService : IUserDeviceService
+{
+    private readonly IGenericRepository<UserDevice> _userDeviceRepository;
+
+    public UserDeviceService(IGenericRepository<UserDevice> userDeviceRepository)
     {
-        Task<UserDevice> GetByIdAsync(int id);
-        Task<IEnumerable<UserDevice>> GetAllAsync();
-        Task<UserDevice> CreateAsync(UserDevice userDevice);
-        Task UpdateAsync(UserDevice userDevice);
-        Task DeleteAsync(int id);
-        Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int? userDeviceTypeId, string userAgent);
+        _userDeviceRepository = userDeviceRepository;
     }
 
-    public class UserDeviceService : IUserDeviceService
+    public async Task<UserDevice> RegisterUserDeviceAsync(UserDevice userDevice)
     {
-        private readonly IGenericRepository<UserDevice> _repository;
+        userDevice.RegistrationDate = DateTime.UtcNow;
+        userDevice.GeneratedKey = GenerateGeneratedKey(); // Rastgele anahtar oluşturma
+        await _userDeviceRepository.AddAsync(userDevice);
+        await _userDeviceRepository.SaveChangesAsync();
+        return userDevice;
+    }
 
-        public UserDeviceService(IGenericRepository<UserDevice> repository)
+    public async Task<UserDevice> GetUserDeviceByIdAsync(int id)
+    {
+        return await _userDeviceRepository.GetByIdAsync(id);
+    }
+
+    public async Task<IEnumerable<UserDevice>> GetAllUserDevicesAsync()
+    {
+        return await _userDeviceRepository.GetAllAsync();
+    }
+
+    private string GenerateGeneratedKey()
+    {
+        return Guid.NewGuid().ToString(); // Benzersiz bir anahtar üretir
+    }
+    public async Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int userDeviceTypeId, string userAgent)
+    {
+        // Önce cihaz mevcut mu kontrol et
+        var existingDevice = (await _userDeviceRepository.FindAsync(d => d.DeviceId == deviceId)).FirstOrDefault();
+        if (existingDevice != null)
         {
-            _repository = repository;
+            // Cihaz mevcutsa, onu geri döndür
+            return existingDevice;
         }
 
-        public async Task<UserDevice> GetByIdAsync(int id)
+        // Cihaz mevcut değilse, yeni bir cihaz oluştur
+        var newDevice = new UserDevice
         {
-            return await _repository.GetByIdAsync(id);
-        }
+            DeviceId = deviceId,
+            BrandName = brandName,
+            Model = model,
+            UserDeviceTypeId = userDeviceTypeId,
+            UserAgent = userAgent,
+            RegistrationDate = DateTime.UtcNow
+        };
 
-        public async Task<IEnumerable<UserDevice>> GetAllAsync()
-        {
-            return await _repository.GetAllAsync();
-        }
+        await _userDeviceRepository.AddAsync(newDevice);
+        await _userDeviceRepository.SaveChangesAsync();
 
-        public async Task<UserDevice> CreateAsync(UserDevice userDevice)
-        {
-            // Benzersiz GUID oluştur ve GeneratedKey kolonuna ata
-            userDevice.GeneratedKey = Guid.NewGuid().ToString();
-
-            await _repository.AddAsync(userDevice);
-            await _repository.SaveChangesAsync();
-            return userDevice;
-        }
-
-        public async Task UpdateAsync(UserDevice userDevice)
-        {
-            _repository.Update(userDevice);
-            await _repository.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            await _repository.SoftDeleteAsync(id);
-            await _repository.SaveChangesAsync();
-        }
-
-        public async Task<UserDevice> GetOrCreateDeviceAsync(string deviceId, string brandName, string model, int? userDeviceTypeId, string userAgent)
-        {
-            var device = (await _repository.FindAsync(d => d.DeviceId == deviceId)).FirstOrDefault();
-
-            if (device == null)
-            {
-                device = new UserDevice
-                {
-                    DeviceId = deviceId,
-                    BrandName = brandName,
-                    Model = model,
-                    UserDeviceTypeId = userDeviceTypeId,
-                    UserAgent = userAgent,
-                    Authorized = 0,
-                    IsMobile = userDeviceTypeId == 2 ? 1 : 0,
-                    RegistrationDate = DateTime.UtcNow,
-                    Active = 1,
-                    GeneratedKey = Guid.NewGuid().ToString() // GUID oluştur ve GeneratedKey kolonuna ata
-                };
-                await CreateAsync(device);
-            }
-            else
-            {
-                device.BrandName = brandName;
-                device.Model = model;
-                device.UserAgent = userAgent;
-                device.UpdateTime = DateTime.UtcNow;
-                await UpdateAsync(device);
-            }
-
-            return device;
-        }
+        return newDevice;
     }
 }
