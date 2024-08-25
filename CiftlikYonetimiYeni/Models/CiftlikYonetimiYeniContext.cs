@@ -28,11 +28,11 @@ public partial class CiftlikYonetimiYeniContext : DbContext
 
     public virtual DbSet<Device> Devices { get; set; }
 
-    public virtual DbSet<DeviceDepartmentMapping> DeviceDepartmentMappings { get; set; }
-
     public virtual DbSet<DeviceProfile> DeviceProfiles { get; set; }
 
     public virtual DbSet<DeviceProfileAttribute> DeviceProfileAttributes { get; set; }
+
+    public virtual DbSet<DeviceUserMapping> DeviceUserMappings { get; set; }
 
     public virtual DbSet<DeviceValueReceive> DeviceValueReceives { get; set; }
 
@@ -155,30 +155,6 @@ public partial class CiftlikYonetimiYeniContext : DbContext
             entity.Property(e => e.UpdateTime).HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<DeviceDepartmentMapping>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("DeviceDepartmentMapping");
-
-            entity.HasIndex(e => e.DeviceId, "FK_Department_Mapping");
-
-            entity.HasIndex(e => e.DepartmentId, "FK_Device_Department");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Department).WithMany(p => p.DeviceDepartmentMappings)
-                .HasForeignKey(d => d.DepartmentId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Device_Department");
-
-            entity.HasOne(d => d.Device).WithMany(p => p.DeviceDepartmentMappings)
-                .HasForeignKey(d => d.DeviceId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_Department_Mapping");
-        });
-
         modelBuilder.Entity<DeviceProfile>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
@@ -222,6 +198,30 @@ public partial class CiftlikYonetimiYeniContext : DbContext
                 .HasForeignKey(d => d.DeviceProfileId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_DeviceProfile_DeviceProfileAttribute");
+        });
+
+        modelBuilder.Entity<DeviceUserMapping>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("DeviceUserMapping");
+
+            entity.HasIndex(e => e.DeviceId, "FK_Department_Mapping");
+
+            entity.HasIndex(e => e.UserId, "FK_Device_User");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Device).WithMany(p => p.DeviceUserMappings)
+                .HasForeignKey(d => d.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Department_Mapping");
+
+            entity.HasOne(d => d.User).WithMany(p => p.DeviceUserMappings)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Device_User");
         });
 
         modelBuilder.Entity<DeviceValueReceive>(entity =>

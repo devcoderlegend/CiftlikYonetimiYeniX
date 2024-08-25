@@ -17,7 +17,7 @@ public partial class DeviceValueReceive
 
     public int? Active { get; set; }
 
-    public virtual DeviceDepartmentMapping? DeviceDepartmentMapping { get; set; }
+    public virtual DeviceUserMapping? DeviceDepartmentMapping { get; set; }
 
     public virtual ICollection<Rfid> Rfids { get; set; } = new List<Rfid>();
 

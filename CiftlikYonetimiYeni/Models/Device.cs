@@ -19,7 +19,7 @@ public partial class Device
 
     public int? Active { get; set; }
 
-    public virtual ICollection<DeviceDepartmentMapping> DeviceDepartmentMappings { get; set; } = new List<DeviceDepartmentMapping>();
-
     public virtual ICollection<DeviceProfile> DeviceProfiles { get; set; } = new List<DeviceProfile>();
+
+    public virtual ICollection<DeviceUserMapping> DeviceUserMappings { get; set; } = new List<DeviceUserMapping>();
 }

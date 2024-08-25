@@ -17,6 +17,8 @@ public partial class User
 
     public int? Active { get; set; }
 
+    public virtual ICollection<DeviceUserMapping> DeviceUserMappings { get; set; } = new List<DeviceUserMapping>();
+
     public virtual RefreshToken? RefreshToken { get; set; }
 
     public virtual ICollection<Rfid> Rfids { get; set; } = new List<Rfid>();

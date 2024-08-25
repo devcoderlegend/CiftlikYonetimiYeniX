@@ -19,7 +19,5 @@ public partial class Department
 
     public virtual Company? Company { get; set; }
 
-    public virtual ICollection<DeviceDepartmentMapping> DeviceDepartmentMappings { get; set; } = new List<DeviceDepartmentMapping>();
-
     public virtual ICollection<Farm> Farms { get; set; } = new List<Farm>();
 }
