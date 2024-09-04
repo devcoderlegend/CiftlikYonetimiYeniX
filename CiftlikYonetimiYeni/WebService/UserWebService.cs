@@ -44,7 +44,7 @@ namespace CiftlikYonetimiYeni.WebService
         {
             var response = new ApiResponse<object>();
 
-            // Handle desktop login (DeviceId = -1)
+            // Web girişleri için (DeviceId = "-1")
             if (model.DeviceId == "-1")
             {
                 var user = await _userService.AuthenticateUserAsync(model.Email, model.Password);
@@ -66,7 +66,19 @@ namespace CiftlikYonetimiYeni.WebService
 
                 await _refreshTokenService.CreateAsync(refreshToken);
 
-                var devices = await _userService.GetUserDevicesAsync(user.Id); // Kullanıcının cihaz bilgilerini al
+                // Yeni kullanıcı oturumu oluştur
+                var userSession = new UserSession
+                {
+                    UserId = user.Id,
+                    LoginTime = DateTime.UtcNow,
+                    ExpireTime = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
+                    GeneratedKey = Guid.NewGuid().ToString(), // Oturum için benzersiz anahtar
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    DeviceId = null,  // Web girişinde cihaz bilgisi olmayabilir
+                    Active = 1
+                };
+
+                await _userSessionService.CreateSessionAsync(userSession);
 
                 response.Success = true;
                 response.Message = "Login successful";
@@ -74,13 +86,14 @@ namespace CiftlikYonetimiYeni.WebService
                 {
                     Token = tokenString,
                     RefreshToken = refreshToken.Token,
-                    Devices = devices  // Cihaz bilgilerini de yanıt olarak dön
+                    SessionId = userSession.Id,  // Oturum bilgisi yanıt olarak gönderilir
+                    GeneratedKey = userSession.GeneratedKey
                 };
 
                 return Ok(response);
             }
 
-            // Handle mobile or other device login
+            // Mobil cihaz girişleri için
             if (string.IsNullOrWhiteSpace(model.GeneratedKey))
             {
                 response.Success = false;
@@ -115,7 +128,19 @@ namespace CiftlikYonetimiYeni.WebService
 
             await _refreshTokenService.CreateAsync(newRefreshToken);
 
-            var devicesForUser = await _userService.GetUserDevicesAsync(userDeviceLogin.Id);  // Kullanıcının cihaz bilgilerini al
+            // Yeni kullanıcı oturumu oluştur
+            var deviceSession = new UserSession
+            {
+                UserId = userDeviceLogin.Id,
+                LoginTime = DateTime.UtcNow,
+                ExpireTime = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
+                GeneratedKey = Guid.NewGuid().ToString(),
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                DeviceId = userDevice.Id,  // Mobil cihazın Id'si
+                Active = 1
+            };
+
+            await _userSessionService.CreateSessionAsync(deviceSession);
 
             response.Success = true;
             response.Message = "Login successful";
@@ -125,11 +150,13 @@ namespace CiftlikYonetimiYeni.WebService
                 RefreshToken = newRefreshToken.Token,
                 UserDeviceId = userDevice.Id,
                 GeneratedKey = userDevice.GeneratedKey,
-                Devices = devicesForUser  // Cihaz bilgilerini de yanıt olarak dön
+                SessionId = deviceSession.Id,  // Oturum bilgisi yanıt olarak gönderilir
+                SessionKey = deviceSession.GeneratedKey
             };
 
             return Ok(response);
         }
+
 
 
         [HttpPost("refresh-token")]
@@ -145,7 +172,7 @@ namespace CiftlikYonetimiYeni.WebService
                 return Unauthorized(response);
             }
 
-            var user = await _userService.GetUserByIdAsync(refreshToken.UserId);
+            var user = await _userService.GetUserByIdAsync(refreshToken.UserId ?? 0);
             var tokenString = GenerateJwtToken(user);
 
             response.Success = true;
@@ -295,6 +322,8 @@ namespace CiftlikYonetimiYeni.WebService
             return Ok(response);
         }
 
+
+
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -363,7 +392,7 @@ namespace CiftlikYonetimiYeni.WebService
         public string Email { get; set; }
         public string Password { get; set; }
         public string DeviceId { get; set; }
-        public string GeneratedKey { get; set; } // Optional when DeviceId is -1
+        public string? GeneratedKey { get; set; } // Optional when DeviceId is -1
     }
 
     public class RefreshTokenModel

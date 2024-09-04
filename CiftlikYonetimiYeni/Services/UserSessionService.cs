@@ -1,4 +1,5 @@
 ﻿using CiftlikYonetimiYeni.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,5 +87,14 @@ namespace CiftlikYonetimiYeni.Services
             }
             await _sessionRepository.SaveChangesAsync();
         }
+
+        public async Task<UserSession> GetActiveSessionAsync(int userId)
+        {
+            return await _sessionRepository
+                .GetAll()
+                .Where(s => s.UserId == userId && s.ExpireTime > DateTime.UtcNow && s.Active == 1)
+                .FirstOrDefaultAsync();
+        }
+
     }
 }

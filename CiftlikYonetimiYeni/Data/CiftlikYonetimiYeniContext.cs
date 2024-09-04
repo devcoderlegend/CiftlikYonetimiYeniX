@@ -63,7 +63,7 @@ public partial class CiftlikYonetimiYeniContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=185.106.20.137;database=CiftlikYonetimiYeni;user=abulu;password=Merlab.2642", ServerVersion.Parse("8.0.39-mysql"));
+        => optionsBuilder.UseMySql("server=185.106.20.137;database=CiftlikYonetimiYeni;user=abulu;password=Merlab.2642", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.39-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -275,14 +275,16 @@ public partial class CiftlikYonetimiYeniContext : DbContext
 
             entity.ToTable("RefreshToken");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.HasIndex(e => e.UserId, "FK_RT_User");
+
             entity.Property(e => e.Created).HasColumnType("datetime");
             entity.Property(e => e.Expires).HasColumnType("datetime");
             entity.Property(e => e.Revoked).HasColumnType("datetime");
             entity.Property(e => e.Token).HasMaxLength(255);
 
-            entity.HasOne(d => d.IdNavigation).WithOne(p => p.RefreshToken)
-                .HasForeignKey<RefreshToken>(d => d.Id)
+            entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_RT_User");
         });
 
